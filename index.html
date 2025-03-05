@@ -107,17 +107,6 @@
       display: none;
     }
 
-    /* 3D Heart Container */
-    #heart-container {
-      position: relative;
-      width: 100%;
-      height: 400px;
-      margin: 40px 0px;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 20px;
-      overflow: hidden;
-    }
-
     /* Animations */
     @keyframes fadeIn {
       from { opacity: 0; }
@@ -145,10 +134,6 @@
       .gallery img, .gallery video {
         width: calc(50% - 10px);
       }
-
-      #heart-container {
-        height: 300px;
-      }
     }
 
     @media (max-width: 480px) {
@@ -158,10 +143,6 @@
 
       .gallery img, .gallery video {
         width: 100%;
-      }
-
-      #heart-container {
-        height: 200px;
       }
     }
   </style>
@@ -178,9 +159,6 @@
 
   <!-- Countdown Timer -->
   <div id="countdown"></div>
-
-  <!-- 3D Heart Section -->
-  <div id="heart-container"></div>
 
   <!-- Main Content -->
   <div class="container">
@@ -246,11 +224,18 @@
     const confettiSettings = {
       particleCount: 5,
       spread: 70,
-      origin: { y: 0 }
+      origin: { y: 0 },
+      ticks: 200,
+      startVelocity: 30,
+      gravity: 0.5,
+      colors: ['#ff6f61', '#ff9a9e', '#fad0c4', '#ffcc00', '#00ccff', '#cc00ff']
     };
 
     const confettiRain = () => {
-      confetti(confettiSettings);
+      confetti({
+        ...confettiSettings,
+        origin: { x: Math.random(), y: 0 }
+      });
       requestAnimationFrame(confettiRain);
     };
 
@@ -269,69 +254,9 @@
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-      countdownElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-      if (distance < 0) {
-        clearInterval(countdownInterval);
-        countdownElement.innerHTML = "Happy Birthday! 🎉";
-        countdownElement.classList.add('birthday-message');
-      }
     };
 
     const countdownInterval = setInterval(updateCountdown, 1000);
-
-    // 3D Rotating Heart
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 400, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    renderer.setSize(window.innerWidth, 400);
-    document.getElementById('heart-container').appendChild(renderer.domElement);
-
-    const heartShape = new THREE.Shape();
-    heartShape.moveTo(0, 0);
-    heartShape.bezierCurveTo(0, 0, 0.5, 1, 1, 0);
-    heartShape.bezierCurveTo(1.5, -1, 2, 1.5, 0, 3);
-    heartShape.bezierCurveTo(-2, 1.5, -1.5, -1, -1, 0);
-    heartShape.bezierCurveTo(-0.5, 1, 0, 0, 0, 0);
-
-    const extrudeSettings = {
-      depth: 0.5,
-      bevelEnabled: true,
-      bevelSegments: 2,
-      steps: 2,
-      bevelSize: 0.1,
-      bevelThickness: 0.1
-    };
-
-    const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff6f61, shininess: 100 });
-    const heart = new THREE.Mesh(geometry, material);
-    scene.add(heart);
-
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(5, 5, 5);
-    scene.add(light);
-
-    const ambientLight = new THREE.AmbientLight(0x404040);
-    scene.add(ambientLight);
-
-    camera.position.z = 5;
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-      heart.rotation.x += 0.01;
-      heart.rotation.y += 0.01;
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    window.addEventListener('resize', () => {
-      const width = window.innerWidth;
-      const height = 400;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-    });
 
     // Show Hidden Surprise Message on Scroll
     window.addEventListener('scroll', () => {
